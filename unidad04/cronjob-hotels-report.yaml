@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    app: hotels
+    tier: cronjob
+    release: v2
+  creationTimestamp: null
+  name: hotels-report
+  namespace: hotels
+spec:
+  selector:
+    matchLabels:
+      app: hotels
+      tier: cronjob
+      release: v2
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      name: hotels-report
+    spec:
+      template:
+        metadata:
+          labels:
+            app: hotels
+            tier: cronjob
+            release: v2
+          creationTimestamp: null
+        spec:
+          containers:
+          - command:
+            - python report.py
+            image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+            name: hotels-report
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: 0 2 * * *
+status: {}

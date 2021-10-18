@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: hotels
+    tier: monolith
+    release: v1
+  name: hotels
+  namespace: hotels
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hotels
+      tier: monolith
+      release: v1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hotels
+        tier: monolith
+        release: v1
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels:monolith
+        name: k8s4arch-hotels
+        ports:
+        - containerPort: 80
+        resources: {}
+status: {}

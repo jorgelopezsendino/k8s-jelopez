@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hotels
+    tier: monolith
+    release: v2
+  name: hotels
+  namespace: hotels
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: hotels
+      tier: monolith
+      release: v2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: hotels
+        tier: monolith
+        release: v2
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels:monolith-v2
+        name: k8s4arch-hotels
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 20        
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10        
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1

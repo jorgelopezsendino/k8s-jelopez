@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hotels
+    tier: backend
+    release: v3
+  name: hotels-backend
+  namespace: hotels
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: hotels
+      tier: backend
+      release: v3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%  
+  template:
+    metadata:
+      labels:
+        app: hotels
+        tier: backend
+        release: v3
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: k8s4arch-hotels-backend
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: hotels-config
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 20        
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 10        
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1

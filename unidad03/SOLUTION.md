@@ -1,6 +1,6 @@
 # Create namespace and deployment yaml files
 microk8s kubectl create ns hotels --dry-run=client --output=yaml > namespace-hotels.yaml
-microk8s kubectl create deploy hotels --image "ghcr.io/go-elevate/k8s4arch-hotels:monolith" -n hotels --replicas=2 --port=80 --dry-run=client --output=yaml > deploy-hotels.yaml
+microk8s kubectl create deploy hotels --image "ghcr.io/go-elevate/k8s4arch-hotels:monolith" -n hotels --replicas=2 --port=80 --dry-run=client --output=yaml > deploy-hotels-3.yaml
 
 # Apply yaml files
 microk8s kubectl apply -f namespace-hotels.yaml

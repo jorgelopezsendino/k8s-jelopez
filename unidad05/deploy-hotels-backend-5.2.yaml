@@ -42,8 +42,7 @@ spec:
         - configMapRef:
             name: hotels-config
         livenessProbe:
-          httpGet:
-            path: /status
+          tcpSocket:
             port: 5000
           initialDelaySeconds: 20        
           periodSeconds: 20

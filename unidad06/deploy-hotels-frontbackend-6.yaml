@@ -26,9 +26,28 @@ spec:
         tier: frontbackend
         release: v3
     spec:
-      containers:
+      initContainers:
       - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
-        name: hotels-backend
+        name: hotels-migrations
+        command: ["python", "migrations.py"]
+        envFrom:
+        - configMapRef:
+            name: hotels-config
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1G
+          limits:
+            cpu: 1
+            memory: 2G
+        volumeMounts:
+        - mountPath: "/db"
+          name: db
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:slim
+        name: hotels-frontend
+        ports:
+        - containerPort: 80
         resources:
           requests:
             cpu: 0.5
@@ -39,11 +58,30 @@ spec:
         envFrom:
         - configMapRef:
             name: hotels-config
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 20        
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 10        
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
         volumeMounts:
         - mountPath: "/db"
           name: db
-      - image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:slim
-        name: hotels-frontend
+        volumeMounts:
+        - mountPath: "/db"
+          name: db
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: hotels-backend
         ports:
         - containerPort: 5000
         resources:
@@ -78,5 +116,4 @@ spec:
           name: db
       volumes:
       - name: db
-        persistentVolumeClaim:
-          claimName: hotels-db
+        emptyDir: {}

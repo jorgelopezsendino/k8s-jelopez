@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hotels
+    tier: frontbackend
+    release: v3
+  name: hotels-frontbackend
+  namespace: hotels
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: hotels
+      tier: frontbackend
+      release: v3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%  
+  template:
+    metadata:
+      labels:
+        app: hotels
+        tier: frontbackend
+        release: v3
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: hotels-backend
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1G
+          limits:
+            cpu: 1
+            memory: 2G
+        envFrom:
+        - configMapRef:
+            name: hotels-config
+        volumeMounts:
+        - mountPath: "/db"
+          name: db
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:slim
+        name: hotels-frontend
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1G
+          limits:
+            cpu: 1
+            memory: 2G
+        envFrom:
+        - configMapRef:
+            name: hotels-config
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 20        
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 10        
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        volumeMounts:
+        - mountPath: "/db"
+          name: db
+      volumes:
+      - name: db
+        persistentVolumeClaim:
+          claimName: hotels-db

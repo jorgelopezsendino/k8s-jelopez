@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: hotels-config
+  namespace: hotels
+  labels:
+    app: hotels
+    release: v3
+data:
+  DB_PATH: /db/hotels.json
+  DB_TABLE: hotels

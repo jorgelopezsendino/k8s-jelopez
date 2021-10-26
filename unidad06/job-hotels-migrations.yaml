@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: null
+  name: hotels-migrations
+  namespace: hotels
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: hotels-migrations
+        command: ["python", "migrations.py"]
+        envFrom:
+        - configMapRef:
+            name: hotels-config
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1G
+          limits:
+            cpu: 1
+            memory: 2G
+        volumeMounts:
+        - mountPath: "/db"
+          name: db
+      volumes:
+      - name: db
+        persistentVolumeClaim:
+          claimName: hotels-db
+      restartPolicy: OnFailure
